@@ -43,7 +43,9 @@ async function GetUsers() {
     if (response.ok === true) {
     // получаем данные
     const users = await response.json(); 
+        console.log(users, 'USERS')
         users.forEach(user => {
+            console.log(user, 'USE')
             // добавляем полученные элементы в таблицу
             tbody.append(row(user));
         });
