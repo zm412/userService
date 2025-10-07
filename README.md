@@ -24,7 +24,6 @@ A simple Node.js application for managing users with authentication, role-based 
 ## Installation
 
 1. Clone the repository:
-```bash
 ** git clone <repository_url> **
 ** cd nodejsTest **
 
