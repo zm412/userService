@@ -20,11 +20,6 @@ class AuthService {
         }
 
         const hashPassword = await bcrypt.hash(password, 7);
-        console.log(
-            password,
-            hashPassword,
-            "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
-        );
 
         const user = await userRepository.create({
             fullName,
@@ -37,10 +32,8 @@ class AuthService {
     }
 
     async login(body) {
-        console.log(body, "BBBBBBBBBBBBBBBb");
         const { email, password, fullName } = body;
         const user = await userRepository.findOneByEmail(email);
-        console.log(user.password, "USEEEEEEEEEEEEEEERRRR");
 
         if (!user) {
             const error = new Error(`Пользователь ${username} не найден`);

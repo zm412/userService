@@ -1,12 +1,13 @@
 import express from "express";
 import userController from "../controllers/userController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
+const { authenticate, requireRole, requireSelfOrAdmin } = authMiddleware
+console.log( authenticate, requireRole, requireSelfOrAdmin , 'LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL')
 
 const userRouter = express.Router();
 
-userRouter.post("/create", userController.addUser);
-userRouter.get("/", authMiddleware.roles(['admin']), userController.getUsers);
-userRouter.get("/:id", userController.getUser);
-userRouter.patch("/:id/block", userController.blockUser);
+userRouter.get("/", authenticate, requireRole(["admin"]), userController.getUsers);
+userRouter.get("/:id", authenticate, requireSelfOrAdmin(), userController.getUser);
+userRouter.patch("/:id/block", authenticate, requireSelfOrAdmin(), userController.blockUser);
 
 export default userRouter;

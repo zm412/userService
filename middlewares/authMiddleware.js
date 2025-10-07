@@ -2,68 +2,44 @@ import authService from "../services/authService.js";
 
 class AuthMiddleware {
     authenticate(req, res, next) {
-        if (req.method === "OPTIONS") {
-            next();
-        }
+        if (req.method === "OPTIONS") return next();
 
         try {
             const token = authService.extractToken(req);
+            if (!token)
+                return res.status(403).json({ message: "Не авторизован" });
 
-            if (!token) {
-                return res
-                    .status(403)
-                    .json({ message: "Пользователь не авторизован" });
-            }
-
-            const decodedData = authService.verifyToken(token);
-            req.user = decodedData;
+            req.user = authService.verifyToken(token);
             next();
         } catch (e) {
-            console.log(e);
-            return res
-                .status(403)
-                .json({ message: "Пользователь не авторизован" });
+            console.error(e);
+            return res.status(403).json({ message: "Не авторизован" });
         }
     }
 
-    roles(roles) {
+    requireRole(roles) {
         return function (req, res, next) {
-            if (req.method === "OPTIONS") {
-                next();
+            if (!req.user)
+                return res.status(403).json({ message: "Не авторизован" });
+
+            if (!roles.includes(req.user.role)) {
+                return res.status(403).json({ message: "Нет доступа" });
             }
+            next();
+        };
+    }
 
-            try {
-                const token = authService.extractToken(req);
+    requireSelfOrAdmin(idParam = "id") {
+        return function (req, res, next) {
+            if (!req.user)
+                return res.status(403).json({ message: "Не авторизован" });
 
-                if (!token) {
-                    return res
-                        .status(403)
-                        .json({ message: "Пользователь не авторизован" });
-                }
-
-                const { role } = authService.verifyToken(token);
-
-                let hasRole = false;
-                console.log(roles, 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBb')
-                if (roles.includes(role)) {
-                    hasRole = true;
-                }
-
-                if (!hasRole) {
-                    return res
-                        .status(403)
-                        .json({ message: "У вас нет доступа" });
-                }
-
-                next();
-            } catch (e) {
-                console.log(e);
-
-                return res
-                    .status(403)
-                    .json({ message: "Пользователь не авторизован" });
+            const targetId = req.params[idParam];
+            if (req.user.role !== "admin" && req.user.id !== targetId) {
+                return res.status(403).json({ message: "Нет доступа" });
             }
-        }
+            next();
+        };
     }
 }
 

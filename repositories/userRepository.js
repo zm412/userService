@@ -32,7 +32,10 @@ class UserRepository {
     }
 
     async updateStatus(id, isActive) {
-        if (!id) throw new Error("Не указан ID");
+        if (!id) {
+            throw new Error("Не указан ID");
+        }
+
         return await User.findByIdAndUpdate(id, { isActive }, { new: true });
     }
 }

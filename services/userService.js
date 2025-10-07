@@ -1,33 +1,33 @@
 import userRepository from "../repositories/userRepository.js";
 
 class UserService {
-    async getUserById(requester, targetId) {
-        if (requester.role !== "admin" && requester.id !== targetId)
-            throw new Error("Access denied");
-
+    async getUserById(targetId) {
         const user = await userRepository.getOne(targetId);
-        if (!user) throw new Error("User not found");
 
         return this.sanitize(user);
     }
 
-    async listUsers(requesterRole) {
-        if (requesterRole !== "admin")
-            throw new Error("Only admin can view user list");
-
+    async listUsers() {
         return await userRepository.getAll();
     }
 
-    async blockUser(requester, targetId, isActive) {
-        if (requester.role !== "admin") throw new Error("Forbidden");
+    async blockUser(id) {
+        const user = await userRepository.updateStatus(
+            id,
+            false
+        );
+        console.log(user, 'USERFFFFFFFFFFFFFFff')
 
-        const user = await userRepository.updateStatus(targetId, isActive);
-        if (!user) throw new Error("User not found");
+        if (!user) {
+            const error = new Error("Пользователь не найден");
+            error.status = 404;
+            throw error;
+        }
 
         return this.sanitize(user);
     }
 
-    #sanitize(user) {
+    sanitize(user) {
         const { password, __v, ...safe } = user.toObject
             ? user.toObject()
             : user;
