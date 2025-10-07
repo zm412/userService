@@ -7,9 +7,8 @@ console.log(secret, 'SSSSSSSSSSSS')
 
 class AuthService {
     async createUser(body) {
-        const { fullName, password,  email, role } = body;
+        const { fullName, password,  email, role, birthDate } = body;
         const candidate = await userRepository.findOneByEmail(email);
-        console.log(candidate, "CCCCCCCCCCCCCCCCCccc");
 
         if (candidate) {
             const error = new Error(
@@ -26,6 +25,7 @@ class AuthService {
             password: hashPassword,
             role,
             email,
+            birthDate,
         });
 
         return user;

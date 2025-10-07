@@ -16,7 +16,6 @@ class UserService {
             id,
             false
         );
-        console.log(user, 'USERFFFFFFFFFFFFFFff')
 
         if (!user) {
             const error = new Error("Пользователь не найден");
