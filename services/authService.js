@@ -1,25 +1,18 @@
 import userRepository from "../repositories/userRepository.js";
-import { validationResult } from "express-validator";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import {secret} from "../config.js";
-console.log(secret, 'SSSSSSSSSSSS')
+import { secret } from "../config.js";
 
 class AuthService {
     async createUser(body) {
-        const { fullName, password,  email, role, birthDate } = body;
+        const { fullName, password, email, role, birthDate } = body;
         const candidate = await userRepository.findOneByEmail(email);
 
         if (candidate) {
-            const error = new Error(
-                "Пользователь с таким адресом уже существует",
-            );
-            error.statusCode = 400;
-            throw error;
+            this.throwError("Пользователь с таким адресом уже существует");
         }
 
         const hashPassword = await bcrypt.hash(password, 7);
-
         const user = await userRepository.create({
             fullName,
             password: hashPassword,
@@ -36,30 +29,25 @@ class AuthService {
         const user = await userRepository.findOneByEmail(email);
 
         if (!user) {
-            const error = new Error(`Пользователь ${username} не найден`);
-            error.statusCode = 400;
-
-            throw error;
+            this.throwError(`Пользователь ${email} не найден`);
         }
 
-        const validPassword = bcrypt.compareSync(password, user.password);
+        const validPassword = await bcrypt.compare(password, user.password);
 
         if (!validPassword) {
-            const error = new Error("Введен неверный пароль");
-            error.statusCode = 400;
-
-            throw error;
+            this.throwError("Введен неверный пароль");
         }
 
-        const token = this.generateAccessToken(user._id, user.role);
+        const token = this.generateAccessToken(user._id, user.role, user.email);
 
         return { token };
     }
 
-    generateAccessToken(id, role) {
+    generateAccessToken(id, role, email) {
         const payload = {
             id,
             role,
+            email
         };
 
         return jwt.sign(payload, secret, { expiresIn: "24h" });
@@ -72,7 +60,6 @@ class AuthService {
 
         try {
             const decoded = jwt.verify(token, secret);
-        console.log(decoded, 'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTt')
 
             return decoded;
         } catch (err) {
@@ -82,14 +69,21 @@ class AuthService {
 
     extractToken(req) {
         const authHeader = req.headers.authorization;
-
         if (!authHeader) {
             return null;
         }
 
-        const parts = authHeader.split(" ");
+        const token = authHeader.startsWith("Bearer ")
+            ? authHeader.split(" ")[1]
+            : authHeader;
 
-        return parts.length === 2 ? parts[1] : null;
+        return token || null;
+    }
+
+    throwError(message, code = 400) {
+        const error = new Error(message);
+        error.statusCode = code;
+        throw error;
     }
 }
 

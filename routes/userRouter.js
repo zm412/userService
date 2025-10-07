@@ -3,10 +3,25 @@ import userController from "../controllers/userController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 
 const userRouter = express.Router();
-const { authenticate, requireRole, requireSelfOrAdmin } = authMiddleware
+const { authenticate, requireRole, requireSelfOrAdmin } = authMiddleware;
 
-userRouter.get("/", authenticate, requireRole(["admin"]), userController.getUsers);
-userRouter.get("/:id", authenticate, requireSelfOrAdmin(), userController.getUser);
-userRouter.patch("/:id/block", authenticate, requireSelfOrAdmin(), userController.blockUser);
+userRouter.get(
+    "/",
+    authenticate,
+    requireRole(["admin"]),
+    userController.getUsers,
+);
+userRouter.get(
+    "/:id",
+    authenticate,
+    requireSelfOrAdmin(),
+    userController.getUser,
+);
+userRouter.patch(
+    "/:id/block",
+    authenticate,
+    requireSelfOrAdmin(),
+    userController.blockUser,
+);
 
 export default userRouter;

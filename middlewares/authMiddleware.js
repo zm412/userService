@@ -35,7 +35,8 @@ class AuthMiddleware {
                 return res.status(403).json({ message: "Не авторизован" });
 
             const targetId = req.params[idParam];
-            if (req.user.role !== "admin" && req.user.id !== targetId) {
+
+            if (req.user.role !== "admin" && req.user.id.toString() !== targetId) {
                 return res.status(403).json({ message: "Нет доступа" });
             }
             next();

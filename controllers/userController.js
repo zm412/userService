@@ -5,14 +5,12 @@ class UserController {
     async getUsers(req, res) {
         try {
             const users = await userService.listUsers(req);
-            res.json(users)
+            res.json(users);
         } catch (e) {
-            console.log(e)
-            
+            console.error("Error:", e);
             res.status(500).send({
                 error: "Ошибка при получении пользователей",
             });
-
         }
     }
 
@@ -21,7 +19,6 @@ class UserController {
             const { id } = req.params;
             const user = await userService.getUserById(id);
             console.log(user, 'USER')
-
             if (!user)
                 return res
                     .status(404)
@@ -39,10 +36,12 @@ class UserController {
         try {
             const { id } = req.params;
             const user = await userService.blockUser(id);
-            res.send({ message: "Пользователь заблокирован", user });
+            res.status(200).json({
+                message: "Пользователь заблокирован",
+                user,
+            });
         } catch (error) {
             console.error("Error blocking user:", error);
-
             const status = error.status || 500;
             const message =
                 error.status === 404

@@ -1,32 +1,43 @@
 import User from "../models/User.js";
+import mongoose from "mongoose";
 
 class UserRepository {
     async create(itemObject) {
-        return await User.create(itemObject);
+        const user = await User.create(itemObject);
+        const obj = user.toObject();
+        delete obj.password;
+
+        return obj;
     }
 
     async getAll() {
-        return await User.find();
+        return await User.find().lean();
     }
 
     async findOneByEmail(email) {
-        return await User.findOne({email}).select('+password')
+        return await User.findOne({ email }).select("+password");
     }
 
     async getOne(id) {
-        if (!id) {
-            throw new Error("Не указан ID");
+        if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+            this.throwError("Не указан ID");
         }
 
-        return await User.findById(id);
+        return await User.findById(id).lean();
     }
 
     async updateStatus(id, isActive) {
-        if (!id) {
-            throw new Error("Не указан ID");
+        if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+            this.throwError("Не указан ID");
         }
 
         return await User.findByIdAndUpdate(id, { isActive }, { new: true });
+    }
+
+    throwError(message, code = 400) {
+        const error = new Error(message);
+        error.statusCode = code;
+        throw error;
     }
 }
 
