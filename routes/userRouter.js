@@ -1,12 +1,12 @@
 import express from "express";
-import UserController from "../controllers/UserController.js";
-import {authenticate} from "../middlewares/authMiddleware.js";
+import userController from "../controllers/userController.js";
+import authMiddleware from "../middlewares/authMiddleware.js";
 
 const userRouter = express.Router();
 
-userRouter.post("/create", UserController.addUser);
-userRouter.get("/", UserController.getUsers);
-userRouter.get("/:id", UserController.getUser);
-userRouter.patch("/:id/block", UserController.blockUser);
+userRouter.post("/create", userController.addUser);
+userRouter.get("/", authMiddleware.roles(['admin']), userController.getUsers);
+userRouter.get("/:id", userController.getUser);
+userRouter.patch("/:id/block", userController.blockUser);
 
 export default userRouter;

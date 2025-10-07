@@ -9,6 +9,10 @@ class UserRepository {
         return await User.find();
     }
 
+    async findOneByEmail(email) {
+        return await User.findOne({email}).select('+password')
+    }
+
     async getOne(id) {
         if (!id) {
             throw new Error("Не указан ID");

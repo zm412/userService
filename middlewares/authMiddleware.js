@@ -1,13 +1,70 @@
-import jwt from "jsonwebtoken";
+import authService from "../services/authService.js";
 
-export const authenticate = (req, res, next) => {
-    const header = req.headers.authorization;
-    if (!header || !header.startsWith("Bearer "))
-        return res.status(401).json({ message: "No token" });
+class AuthMiddleware {
+    authenticate(req, res, next) {
+        if (req.method === "OPTIONS") {
+            next();
+        }
 
-    try {
-        next();
-    } catch {
-        return res.status(401).json({ message: "Invalid token" });
+        try {
+            const token = authService.extractToken(req);
+
+            if (!token) {
+                return res
+                    .status(403)
+                    .json({ message: "Пользователь не авторизован" });
+            }
+
+            const decodedData = authService.verifyToken(token);
+            req.user = decodedData;
+            next();
+        } catch (e) {
+            console.log(e);
+            return res
+                .status(403)
+                .json({ message: "Пользователь не авторизован" });
+        }
     }
-};
+
+    roles(roles) {
+        return function (req, res, next) {
+            if (req.method === "OPTIONS") {
+                next();
+            }
+
+            try {
+                const token = authService.extractToken(req);
+
+                if (!token) {
+                    return res
+                        .status(403)
+                        .json({ message: "Пользователь не авторизован" });
+                }
+
+                const { role } = authService.verifyToken(token);
+
+                let hasRole = false;
+                console.log(roles, 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBb')
+                if (roles.includes(role)) {
+                    hasRole = true;
+                }
+
+                if (!hasRole) {
+                    return res
+                        .status(403)
+                        .json({ message: "У вас нет доступа" });
+                }
+
+                next();
+            } catch (e) {
+                console.log(e);
+
+                return res
+                    .status(403)
+                    .json({ message: "Пользователь не авторизован" });
+            }
+        }
+    }
+}
+
+export default new AuthMiddleware();

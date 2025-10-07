@@ -1,11 +1,11 @@
 import User from "../models/User.js";
-import userMiddleware from "../middlewares/userMiddleware.js";
+import userService from "../services/userService.js";
 
 class UserController {
     async addUser(req, res) {
         try {
-            const { fullName, birthDate, email, password } = req.body;
-            const newUser = new User({ fullName, birthDate, email, password });
+            const { fullName, birthDate, email, password, role } = req.body;
+            const newUser = new User({ fullName, birthDate, email, password, role });
             await newUser.save();
             res.status(201).send(newUser);
         } catch (error) {
@@ -18,7 +18,20 @@ class UserController {
 
     async getUsers(req, res) {
         try {
-            const users = await userMiddleware.listUsers(req);
+            const users = await User.find()
+            res.json(users)
+        } catch (e) {
+            console.log(e)
+            
+            res.status(500).send({
+                error: "Ошибка при получении пользователей",
+            });
+
+        }
+
+        /*
+        try {
+            const users = await userService.listUsers(req);
             res.send(users);
         } catch (error) {
             if (error.message === "Only admin can view user list") {
@@ -29,6 +42,7 @@ class UserController {
                 error: "Ошибка при получении пользователей",
             });
         }
+        */
     }
 
     async getUser(req, res) {

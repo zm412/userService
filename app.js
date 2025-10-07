@@ -2,6 +2,7 @@ import express from 'express'
 import mongoose from 'mongoose'
 import userRouter from "./routes/userRouter.js";
 import homeRouter from "./routes/homeRouter.js";
+import authRouter from "./routes/authRouter.js";
 
 const app = express();
 
@@ -19,6 +20,7 @@ async function main() {
 app.use(express.static("public"));
 app.use(express.json());
  
+app.use("/api", authRouter);;
 app.use("/api/users", userRouter);;
 app.use("/", homeRouter);
  
