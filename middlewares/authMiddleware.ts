@@ -1,7 +1,9 @@
+import { Response, NextFunction } from "express";
 import authService from "../services/authService.js";
+import { UserRole, AuthRequest } from "../types/userServiceTypes.js";
 
 class AuthMiddleware {
-    authenticate(req, res, next) {
+    authenticate(req: AuthRequest, res: Response, next: NextFunction) {
         if (req.method === "OPTIONS") return next();
 
         try {
@@ -17,8 +19,8 @@ class AuthMiddleware {
         }
     }
 
-    requireRole(roles) {
-        return function (req, res, next) {
+    requireRole(roles: UserRole[]) {
+        return function (req: AuthRequest, res: Response, next: NextFunction) {
             if (!req.user)
                 return res.status(403).json({ message: "Не авторизован" });
 
@@ -30,7 +32,7 @@ class AuthMiddleware {
     }
 
     requireSelfOrAdmin(idParam = "id") {
-        return function (req, res, next) {
+        return function (req: AuthRequest, res: Response, next: NextFunction) {
             if (!req.user)
                 return res.status(403).json({ message: "Не авторизован" });
 

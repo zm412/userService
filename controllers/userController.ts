@@ -1,12 +1,12 @@
-import User from "../models/User.js";
+import { Request, Response } from "express";
 import userService from "../services/userService.js";
 
 class UserController {
-    async getUsers(req, res) {
+    async getUsers(req: Request, res: Response) {
         try {
-            const users = await userService.listUsers(req);
+            const users = await userService.listUsers();
             res.json(users);
-        } catch (e) {
+        } catch (e: any) {
             console.error("Error:", e);
             res.status(500).send({
                 error: "Ошибка при получении пользователей",
@@ -14,7 +14,7 @@ class UserController {
         }
     }
 
-    async getUser(req, res) {
+    async getUser(req: Request, res: Response) {
         try {
             const { id } = req.params;
             const user = await userService.getUserById(id);
@@ -24,7 +24,7 @@ class UserController {
                     .status(404)
                     .send({ error: "Пользователь не найден" });
             res.send(user);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error fetching user:", error);
             res.status(500).send({
                 error: "Ошибка при получении пользователя",
@@ -32,7 +32,7 @@ class UserController {
         }
     }
 
-    async blockUser(req, res) {
+    async blockUser(req: Request, res: Response) {
         try {
             const { id } = req.params;
             const user = await userService.blockUser(id);
@@ -40,7 +40,7 @@ class UserController {
                 message: "Пользователь заблокирован",
                 user,
             });
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error blocking user:", error);
             const status = error.status || 500;
             const message =

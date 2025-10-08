@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",                 // Современный JS
+    "module": "ESNext",                 // Используем ESM
+    "moduleResolution": "node",         // Разрешение модулей по Node-способу
+    "rootDir": "./",                     // Корень исходников
+    "outDir": "./dist",                  // Куда компилировать
+    //"strict": true,                      // Включить все строгие проверки TS (включаю только временами, для глубокой проверки)
+    "esModuleInterop": true,             // Позволяет default-import CommonJS (отключает ошибки при импортах, если дефолтный экспорт в библиотеке отсутствует)
+    "allowSyntheticDefaultImports": true,// Для удобных default импортов 
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,                // Пропуск проверки типов в node_modules
+    "resolveJsonModule": true,           // Импорт JSON
+    "noEmitOnError": true                // Не компилировать при ошибках TS
+  },
+  "include": ["**/*.ts", "**/*.js"],     // Поддержка и TS, и JS файлов
+  "exclude": ["node_modules", "dist"]    // Исключаем node_modules и dist
+}

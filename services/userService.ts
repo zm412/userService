@@ -1,32 +1,36 @@
 import userRepository from "../repositories/userRepository.js";
+import { IUser } from "../types/userServiceTypes.js";
 
 class UserService {
-    async getUserById(targetId) {
+    async getUserById(targetId: string) {
         const user = await userRepository.getOne(targetId);
+
         return this.sanitize(user);
     }
 
     async listUsers() {
         const users = await userRepository.getAll();
-        return users.map((user) => this.sanitize(user));
+        return users.map((user: IUser) => this.sanitize(user));
     }
 
-    async blockUser(id) {
+    async blockUser(id: string) {
         const user = await userRepository.updateStatus(id, false);
 
         if (!user) {
             const error = new Error("Пользователь не найден");
-            error.statusCode = 404;
             throw error;
         }
 
         return this.sanitize(user);
     }
 
-    sanitize(user) {
-        const { password, __v, ...safe } =
-            typeof user.toObject === "function" ? user.toObject() : user;
-        return safe;
+    sanitize(user: IUser | null) {
+        if (user) {
+            const { password, ...safe } = user;
+            return safe;
+        }
+
+        return user
     }
 }
 

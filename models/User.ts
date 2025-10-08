@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
+import type { IUser } from "../types/userServiceTypes.js";
 
-const UserSchema = new mongoose.Schema(
+const UserSchema = new mongoose.Schema<IUser>(
     {
         fullName: { type: String, required: true },
         birthDate: { type: Date, required: false },
@@ -17,8 +18,8 @@ const UserSchema = new mongoose.Schema(
     },
     {
         timestamps: true,
-    },
+    }
 );
 
-const User = mongoose.model("User", UserSchema);
+const User = mongoose.model<IUser>("User", UserSchema);
 export default User;

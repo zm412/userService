@@ -32,3 +32,4 @@ process.on("SIGINT", async () => {
     console.log("Приложение завершило работу");
     process.exit();
 });
+

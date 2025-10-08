@@ -1,10 +1,17 @@
 import userRepository from "../repositories/userRepository.js";
+import { Request } from "express";
+import {
+    TokenPayload,
+    RegistrationBody,
+    LoginBody,
+    UserRole,
+} from "../types/userServiceTypes.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { secret } from "../config.js";
 
 class AuthService {
-    async createUser(body) {
+    async createUser(body: RegistrationBody) {
         const { fullName, password, email, role, birthDate } = body;
         const candidate = await userRepository.findOneByEmail(email);
 
@@ -24,36 +31,44 @@ class AuthService {
         return user;
     }
 
-    async login(body) {
-        const { email, password, fullName } = body;
+    async login(body: LoginBody) {
+        const { email, password } = body;
         const user = await userRepository.findOneByEmail(email);
 
         if (!user) {
             this.throwError(`Пользователь ${email} не найден`);
+
+            return;
         }
 
         const validPassword = await bcrypt.compare(password, user.password);
 
         if (!validPassword) {
             this.throwError("Введен неверный пароль");
+
+            return;
         }
 
-        const token = this.generateAccessToken(user._id, user.role, user.email);
+        const token = this.generateAccessToken(
+            user._id.toString(),
+            user.role,
+            user.email,
+        );
 
         return { token };
     }
 
-    generateAccessToken(id, role, email) {
+    generateAccessToken(id: string, role: UserRole, email: string) {
         const payload = {
             id,
             role,
-            email
+            email,
         };
 
         return jwt.sign(payload, secret, { expiresIn: "24h" });
     }
 
-    verifyToken(token) {
+    verifyToken(token: string): TokenPayload {
         if (!token) {
             throw new Error("Token not provided");
         }
@@ -61,13 +76,17 @@ class AuthService {
         try {
             const decoded = jwt.verify(token, secret);
 
-            return decoded;
+            if (typeof decoded === "string") {
+                throw new Error("Invalid token format");
+            }
+
+            return decoded as TokenPayload;
         } catch (err) {
             throw new Error("Invalid token");
         }
     }
 
-    extractToken(req) {
+    extractToken(req: Request) {
         const authHeader = req.headers.authorization;
         if (!authHeader) {
             return null;
@@ -80,8 +99,8 @@ class AuthService {
         return token || null;
     }
 
-    throwError(message, code = 400) {
-        const error = new Error(message);
+    throwError(message: string, code: number = 400): never {
+        const error = new Error(message) as Error & { statusCode?: number };
         error.statusCode = code;
         throw error;
     }

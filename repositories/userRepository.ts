@@ -1,24 +1,24 @@
 import User from "../models/User.js";
 import mongoose from "mongoose";
+import type { UserItem } from "../types/userServiceTypes.js";
 
 class UserRepository {
-    async create(itemObject) {
+    async create(itemObject: UserItem) {
         const user = await User.create(itemObject);
-        const obj = user.toObject();
-        delete obj.password;
+        const { password, ...safe } = user.toObject();
 
-        return obj;
+        return safe;
     }
 
     async getAll() {
         return await User.find().lean();
     }
 
-    async findOneByEmail(email) {
+    async findOneByEmail(email: string) {
         return await User.findOne({ email }).select("+password");
     }
 
-    async getOne(id) {
+    async getOne(id: string) {
         if (!id || !mongoose.Types.ObjectId.isValid(id)) {
             this.throwError("Не указан ID");
         }
@@ -26,7 +26,7 @@ class UserRepository {
         return await User.findById(id).lean();
     }
 
-    async updateStatus(id, isActive) {
+    async updateStatus(id: string, isActive: boolean) {
         if (!id || !mongoose.Types.ObjectId.isValid(id)) {
             this.throwError("Не указан ID");
         }
@@ -34,9 +34,8 @@ class UserRepository {
         return await User.findByIdAndUpdate(id, { isActive }, { new: true });
     }
 
-    throwError(message, code = 400) {
+    throwError(message: string) {
         const error = new Error(message);
-        error.statusCode = code;
         throw error;
     }
 }
