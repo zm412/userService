@@ -28,9 +28,7 @@ class AuthController {
     }
     async login(req, res) {
         try {
-            console.log("EEEEEEEEEEEEEEEEEEEEEE", this.authService);
             const result = await this.authService.login(req.body);
-            console.log(result, "DDDDDDDDDDDDDDdd");
             return res.json(result);
         }
         catch (e) {

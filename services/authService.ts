@@ -45,8 +45,6 @@ class AuthService implements IAuthService {
     async login(body: LoginBody) {
         const { email, password } = body;
         const user = await this.userRepository.findOneByEmail(email);
-        console.log(user, "UUUUUUUUUUUUUU");
-
         if (!user) {
             this.throwError(`Пользователь ${email} не найден`);
 
@@ -100,7 +98,6 @@ class AuthService implements IAuthService {
 
     extractToken(req: Request) {
         const authHeader = req.headers.authorization;
-        console.log(req, "RRRRRRRRRRRRRRRRR");
         if (!authHeader) {
             return null;
         }

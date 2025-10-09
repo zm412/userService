@@ -28,7 +28,6 @@ class AuthService {
     async login(body) {
         const { email, password } = body;
         const user = await this.userRepository.findOneByEmail(email);
-        console.log(user, "UUUUUUUUUUUUUU");
         if (!user) {
             this.throwError(`Пользователь ${email} не найден`);
             return;
@@ -66,7 +65,6 @@ class AuthService {
     }
     extractToken(req) {
         const authHeader = req.headers.authorization;
-        console.log(req, "RRRRRRRRRRRRRRRRR");
         if (!authHeader) {
             return null;
         }
