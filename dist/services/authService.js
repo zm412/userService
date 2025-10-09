@@ -1,16 +1,22 @@
-import userRepository from "../repositories/userRepository.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { secret } from "../config.js";
 class AuthService {
+    constructor(repository) {
+        this.userRepository = repository;
+        this.createUser = this.createUser.bind(this);
+        this.login = this.login.bind(this);
+        this.verifyToken = this.verifyToken.bind(this);
+        this.extractToken = this.extractToken.bind(this);
+    }
     async createUser(body) {
         const { fullName, password, email, role, birthDate } = body;
-        const candidate = await userRepository.findOneByEmail(email);
+        const candidate = await this.userRepository.findOneByEmail(email);
         if (candidate) {
             this.throwError("Пользователь с таким адресом уже существует");
         }
         const hashPassword = await bcrypt.hash(password, 7);
-        const user = await userRepository.create({
+        const user = await this.userRepository.create({
             fullName,
             password: hashPassword,
             role,
@@ -21,7 +27,8 @@ class AuthService {
     }
     async login(body) {
         const { email, password } = body;
-        const user = await userRepository.findOneByEmail(email);
+        const user = await this.userRepository.findOneByEmail(email);
+        console.log(user, "UUUUUUUUUUUUUU");
         if (!user) {
             this.throwError(`Пользователь ${email} не найден`);
             return;
@@ -59,6 +66,7 @@ class AuthService {
     }
     extractToken(req) {
         const authHeader = req.headers.authorization;
+        console.log(req, "RRRRRRRRRRRRRRRRR");
         if (!authHeader) {
             return null;
         }
@@ -73,4 +81,4 @@ class AuthService {
         throw error;
     }
 }
-export default new AuthService();
+export default AuthService;

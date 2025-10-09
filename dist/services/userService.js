@@ -1,15 +1,20 @@
-import userRepository from "../repositories/userRepository.js";
 class UserService {
+    constructor(repository) {
+        this.userRepository = repository;
+        this.getUserById = this.getUserById.bind(this);
+        this.listUsers = this.listUsers.bind(this);
+        this.blockUser = this.blockUser.bind(this);
+    }
     async getUserById(targetId) {
-        const user = await userRepository.getOne(targetId);
+        const user = await this.userRepository.getOne(targetId);
         return this.sanitize(user);
     }
     async listUsers() {
-        const users = await userRepository.getAll();
+        const users = await this.userRepository.getAll();
         return users.map((user) => this.sanitize(user));
     }
     async blockUser(id) {
-        const user = await userRepository.updateStatus(id, false);
+        const user = await this.userRepository.updateStatus(id, false);
         if (!user) {
             const error = new Error("Пользователь не найден");
             throw error;
@@ -24,4 +29,4 @@ class UserService {
         return user;
     }
 }
-export default new UserService();
+export default UserService;

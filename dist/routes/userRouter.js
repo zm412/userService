@@ -1,9 +1,10 @@
 import express from "express";
-import userController from "../controllers/userController.js";
-import authMiddleware from "../middlewares/authMiddleware.js";
-const userRouter = express.Router();
-const { authenticate, requireRole, requireSelfOrAdmin } = authMiddleware;
-userRouter.get("/", authenticate, requireRole(["admin"]), userController.getUsers);
-userRouter.get("/:id", authenticate, requireSelfOrAdmin(), userController.getUser);
-userRouter.patch("/:id/block", authenticate, requireSelfOrAdmin(), userController.blockUser);
-export default userRouter;
+// This function acts as a "factory" for the router
+export default function createUserRouter(userController, authMiddleware) {
+    const userRouter = express.Router();
+    const { authenticate, requireRole, requireSelfOrAdmin } = authMiddleware;
+    userRouter.get("/", authenticate, requireRole(["admin"]), userController.getUsers);
+    userRouter.get("/:id", authenticate, requireSelfOrAdmin(), userController.getUser);
+    userRouter.patch("/:id/block", authenticate, requireSelfOrAdmin(), userController.blockUser);
+    return userRouter;
+}

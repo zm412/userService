@@ -1,9 +1,16 @@
 import { Request, Response } from "express";
-import authService from "../services/authService.js";
 import { validationResult } from "express-validator";
+import { IAuthService, IAuthController } from "../types/userServiceTypes.js";
 
+class AuthController implements IAuthController {
+    private authService: IAuthService;
 
-class AuthController {
+    constructor(authService: IAuthService) {
+        this.authService = authService;
+        this.registration = this.registration.bind(this);
+        this.login = this.login.bind(this);
+    }
+
     async registration(req: Request, res: Response) {
         try {
             const errors = validationResult(req);
@@ -13,7 +20,7 @@ class AuthController {
                     .status(400)
                     .json({ message: "Ошибка при регистрации", errors });
             }
-            const user = await authService.createUser(req.body);
+            const user = await this.authService.createUser(req.body);
 
             return res.json({
                 message: "Пользователь успешно зарегистрирован",
@@ -29,7 +36,9 @@ class AuthController {
 
     async login(req: Request, res: Response) {
         try {
-            const result = await authService.login(req.body);
+            console.log("EEEEEEEEEEEEEEEEEEEEEE", this.authService);
+            const result = await this.authService.login(req.body);
+            console.log(result, "DDDDDDDDDDDDDDdd");
 
             return res.json(result);
         } catch (e: any) {
@@ -41,4 +50,4 @@ class AuthController {
     }
 }
 
-export default new AuthController();
+export default AuthController;

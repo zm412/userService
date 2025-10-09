@@ -1,13 +1,18 @@
-import authService from "../services/authService.js";
 class AuthMiddleware {
+    constructor(authService) {
+        this.authService = authService;
+        this.authenticate = this.authenticate.bind(this);
+        this.requireRole = this.requireRole.bind(this);
+        this.requireSelfOrAdmin = this.requireSelfOrAdmin.bind(this);
+    }
     authenticate(req, res, next) {
         if (req.method === "OPTIONS")
             return next();
         try {
-            const token = authService.extractToken(req);
+            const token = this.authService.extractToken(req);
             if (!token)
                 return res.status(403).json({ message: "Не авторизован" });
-            req.user = authService.verifyToken(token);
+            req.user = this.authService.verifyToken(token);
             next();
         }
         catch (e) {
@@ -30,11 +35,12 @@ class AuthMiddleware {
             if (!req.user)
                 return res.status(403).json({ message: "Не авторизован" });
             const targetId = req.params[idParam];
-            if (req.user.role !== "admin" && req.user.id.toString() !== targetId) {
+            if (req.user.role !== "admin" &&
+                req.user.id.toString() !== targetId) {
                 return res.status(403).json({ message: "Нет доступа" });
             }
             next();
         };
     }
 }
-export default new AuthMiddleware();
+export default AuthMiddleware;

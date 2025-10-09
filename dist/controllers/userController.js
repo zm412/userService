@@ -1,8 +1,14 @@
-import userService from "../services/userService.js";
 class UserController {
+    constructor(userService) {
+        this.userService = userService;
+        this.getUser = this.getUser.bind(this);
+        this.getUsers = this.getUsers.bind(this);
+        this.blockUser = this.blockUser.bind(this);
+    }
+    // 3. Controller method for getting all users
     async getUsers(req, res) {
         try {
-            const users = await userService.listUsers();
+            const users = await this.userService.listUsers();
             res.json(users);
         }
         catch (e) {
@@ -12,11 +18,11 @@ class UserController {
             });
         }
     }
+    // 2. Controller method for getting a single user
     async getUser(req, res) {
         try {
             const { id } = req.params;
-            const user = await userService.getUserById(id);
-            console.log(user, 'USER');
+            const user = await this.userService.getUserById(id);
             if (!user)
                 return res
                     .status(404)
@@ -30,10 +36,11 @@ class UserController {
             });
         }
     }
+    // 4. Controller method for blocking a user
     async blockUser(req, res) {
         try {
             const { id } = req.params;
-            const user = await userService.blockUser(id);
+            const user = await this.userService.blockUser(id);
             res.status(200).json({
                 message: "Пользователь заблокирован",
                 user,
@@ -49,4 +56,4 @@ class UserController {
         }
     }
 }
-export default new UserController();
+export default UserController;

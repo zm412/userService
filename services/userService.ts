@@ -1,20 +1,32 @@
-import userRepository from "../repositories/userRepository.js";
-import { IUser } from "../types/userServiceTypes.js";
+import {
+    IUser,
+    IUserService,
+    IUserRepository,
+} from "../types/userServiceTypes.js";
 
-class UserService {
+class UserService implements IUserService {
+    private userRepository: IUserRepository;
+
+    constructor(repository: IUserRepository) {
+        this.userRepository = repository;
+        this.getUserById = this.getUserById.bind(this);
+        this.listUsers = this.listUsers.bind(this);
+        this.blockUser = this.blockUser.bind(this);
+    }
+
     async getUserById(targetId: string) {
-        const user = await userRepository.getOne(targetId);
+        const user = await this.userRepository.getOne(targetId);
 
         return this.sanitize(user);
     }
 
     async listUsers() {
-        const users = await userRepository.getAll();
+        const users = await this.userRepository.getAll();
         return users.map((user: IUser) => this.sanitize(user));
     }
 
     async blockUser(id: string) {
-        const user = await userRepository.updateStatus(id, false);
+        const user = await this.userRepository.updateStatus(id, false);
 
         if (!user) {
             const error = new Error("Пользователь не найден");
@@ -30,8 +42,8 @@ class UserService {
             return safe;
         }
 
-        return user
+        return user;
     }
 }
 
-export default new UserService();
+export default UserService;

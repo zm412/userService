@@ -1,26 +1,37 @@
-import userRepository from "../repositories/userRepository.js";
 import { Request } from "express";
 import {
     TokenPayload,
     RegistrationBody,
     LoginBody,
     UserRole,
+    IAuthService,
+    IUserRepository,
 } from "../types/userServiceTypes.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { secret } from "../config.js";
 
-class AuthService {
+class AuthService implements IAuthService {
+    private userRepository: IUserRepository;
+
+    constructor(repository: IUserRepository) {
+        this.userRepository = repository;
+        this.createUser = this.createUser.bind(this);
+        this.login = this.login.bind(this);
+        this.verifyToken = this.verifyToken.bind(this);
+        this.extractToken = this.extractToken.bind(this);
+    }
+
     async createUser(body: RegistrationBody) {
         const { fullName, password, email, role, birthDate } = body;
-        const candidate = await userRepository.findOneByEmail(email);
+        const candidate = await this.userRepository.findOneByEmail(email);
 
         if (candidate) {
             this.throwError("Пользователь с таким адресом уже существует");
         }
 
         const hashPassword = await bcrypt.hash(password, 7);
-        const user = await userRepository.create({
+        const user = await this.userRepository.create({
             fullName,
             password: hashPassword,
             role,
@@ -33,7 +44,8 @@ class AuthService {
 
     async login(body: LoginBody) {
         const { email, password } = body;
-        const user = await userRepository.findOneByEmail(email);
+        const user = await this.userRepository.findOneByEmail(email);
+        console.log(user, "UUUUUUUUUUUUUU");
 
         if (!user) {
             this.throwError(`Пользователь ${email} не найден`);
@@ -88,6 +100,7 @@ class AuthService {
 
     extractToken(req: Request) {
         const authHeader = req.headers.authorization;
+        console.log(req, "RRRRRRRRRRRRRRRRR");
         if (!authHeader) {
             return null;
         }
@@ -106,4 +119,4 @@ class AuthService {
     }
 }
 
-export default new AuthService();
+export default AuthService;
